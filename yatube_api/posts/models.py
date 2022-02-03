@@ -49,7 +49,6 @@ class Post(models.Model):
     class Meta:
         verbose_name = 'Пост'
         verbose_name_plural = 'Посты'
-        # ordering = ('-pub_date',)
 
     def __str__(self):
         return self.text
@@ -84,7 +83,7 @@ class Comment(models.Model):
         ordering = ('-created',)
 
     def __str__(self):
-        return f'{self.text}'
+        return self.text
 
 
 class Follow(models.Model):

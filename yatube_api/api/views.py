@@ -1,10 +1,10 @@
-from django.core.exceptions import PermissionDenied
-from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
+
+from rest_framework import filters, viewsets
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import IsAuthenticated
 
 from posts.models import Comment, Follow, Group, Post
-
 from .permissions import OwnerOrReadOnly, ReadOnly
 from .serializers import (CommentSerializer, FollowSerializer, GroupSerializer,
                           PostSerializer)
@@ -21,23 +21,8 @@ class PostViewSet(viewsets.ModelViewSet):
             return (ReadOnly(),)
         return super().get_permissions()
 
-    def get_pagination(self):
-        if self.action == 'retrieve':
-            return (None)
-        return super().get_permissions()
-
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
-
-    def perform_update(self, serializer):
-        if serializer.instance.author != self.request.user:
-            raise PermissionDenied('Изменение чужого контента запрещено!')
-        super(PostViewSet, self).perform_update(serializer)
-
-    def perform_destroy(self, instance):
-        if instance.author != self.request.user:
-            raise PermissionDenied('Удаление чужого контента запрещено!')
-        super(PostViewSet, self).perform_destroy(instance)
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
@@ -64,21 +49,14 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    def perform_update(self, serializer):
-        if serializer.instance.author != self.request.user:
-            raise PermissionDenied('Изменение чужого комментария запрещено!')
-        super(CommentViewSet, self).perform_update(serializer)
-
-    def perform_destroy(self, instance):
-        if instance.author != self.request.user:
-            raise PermissionDenied('Удаление чужого комментария запрещено!')
-        super(CommentViewSet, self).perform_destroy(instance)
-
 
 class FollowViewSet(viewsets.ModelViewSet):
     serializer_class = FollowSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('user',)
+    permission_classes = (IsAuthenticated,)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    filterset_fields = ('user', 'following')
+    search_fields = ('following__username',)
+    pagination_class = None
 
     def get_queryset(self):
         user = self.request.user
