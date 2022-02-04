@@ -55,7 +55,7 @@ class FollowViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     filterset_fields = ('user', 'following')
-    search_fields = ('following__username',)
+    search_fields = ('=following__username',)
     pagination_class = None
 
     def get_queryset(self):
