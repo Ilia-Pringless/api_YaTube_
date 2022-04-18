@@ -2,6 +2,9 @@
 
 API для работы с сервисом YaTube
 
+## Технологии 
+Python 3. Django. Django REST API. SQLite. Simple-JWT.
+
 ### Как запустить проект:
 
 * Cоздать и активировать виртуальное окружение:
